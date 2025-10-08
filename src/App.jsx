@@ -3,7 +3,6 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { LoginPage } from './components/auth/LoginPage';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { Loading } from './components/common/Loading';
-import './App.css'
 function AppContent() {
   const { user, loading } = useAuth();
 
