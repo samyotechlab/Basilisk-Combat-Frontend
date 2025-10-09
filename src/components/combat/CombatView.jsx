@@ -57,8 +57,8 @@ export function CombatView() {
     try {
       const availableFighters = fighters.filter(f => selectedFighters.includes(f.id));
       const result = await api.optimizeTeam(token, {
-        available_fighters: availableFighters,
-        battle_config: config,
+        fighters: availableFighters,
+        config: config,
         optimization_mode: 'balanced'
       });
       setOptimization(result);

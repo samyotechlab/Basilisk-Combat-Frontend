@@ -15,7 +15,9 @@ export function CreateFighterModal({ isOpen, onClose, onSuccess }) {
     special_ability: {
       name: '',
       bonus_damage: 0,
-      cooldown: 3
+      cooldown: 3,
+      damage: 0,
+      damage_reduction: 0,
     },
     terrain_affinity: {
       forest: 1.0,
