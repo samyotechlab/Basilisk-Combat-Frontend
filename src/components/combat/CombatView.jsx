@@ -1,26 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { Zap } from 'lucide-react';
-import { FighterCard } from '../fighters/FighterCard';
-import { Select, RangeInput } from '../common/Input';
-import { Button } from '../common/Button';
-import { Card } from '../common/Card';
-import { LoadingSpinner } from '../common/Loading';
-import { api } from '../../services/api';
-import { useAuth } from '../../context/AuthContext';
+import React, { useState, useEffect, useRef } from "react";
+import { Zap } from "lucide-react";
+import { FighterCard } from "../fighters/FighterCard";
+import { Select, RangeInput } from "../common/Input";
+import { Button } from "../common/Button";
+import { Card } from "../common/Card";
+import { LoadingSpinner } from "../common/Loading";
+import { api } from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
+import Swal from "sweetalert2";
 
 export function CombatView() {
   const { token } = useAuth();
   const [fighters, setFighters] = useState([]);
   const [selectedFighters, setSelectedFighters] = useState([]);
   const [config, setConfig] = useState({
-    terrain: 'forest',
+    terrain: "forest",
     basilisk_base_damage: 30,
     rage_multiplier: 1.05,
-    battle_duration_limit: 50
+    battle_duration_limit: 50,
   });
   const [optimization, setOptimization] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingFighters, setLoadingFighters] = useState(true);
+  const optimizationRef = useRef(null);
 
   useEffect(() => {
     loadFighters();
@@ -31,7 +33,7 @@ export function CombatView() {
       const data = await api.getFighters(token);
       setFighters(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Failed to load fighters:', error);
+      console.error("Failed to load fighters:", error);
     } finally {
       setLoadingFighters(false);
     }
@@ -39,7 +41,7 @@ export function CombatView() {
 
   const toggleFighter = (fighterId) => {
     if (selectedFighters.includes(fighterId)) {
-      setSelectedFighters(selectedFighters.filter(id => id !== fighterId));
+      setSelectedFighters(selectedFighters.filter((id) => id !== fighterId));
     } else if (selectedFighters.length < 5) {
       setSelectedFighters([...selectedFighters, fighterId]);
     }
@@ -47,24 +49,38 @@ export function CombatView() {
 
   const handleOptimize = async () => {
     if (selectedFighters.length < 2) {
-      alert('Select at least 2 fighters');
+      alert("Select at least 2 fighters");
       return;
     }
 
     setLoading(true);
     setOptimization(null);
-    
+
     try {
-      const availableFighters = fighters.filter(f => selectedFighters.includes(f.id));
+      const availableFighters = fighters.filter((f) =>
+        selectedFighters.includes(f.id)
+      );
       const result = await api.optimizeTeam(token, {
         fighters: availableFighters,
         config: config,
-        optimization_mode: 'balanced'
+        optimization_mode: "balanced",
       });
       setOptimization(result);
+      setTimeout(() => {
+        optimizationRef.current.scrollIntoView({ behavior: "smooth" });
+      }, 500);
     } catch (error) {
-      console.error('Optimization failed:', error);
-      alert('Optimization failed: ' + error.message);
+      console.error("Optimization failed:", error);
+      // alert('Optimization failed: ' + error.message);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: error || "Something went wrong.",
+        toast: true,
+        position: "top",
+        showConfirmButton: false,
+        timer: 2000,
+      });
     } finally {
       setLoading(false);
     }
@@ -74,8 +90,12 @@ export function CombatView() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-3xl font-bold text-white mb-2">Combat Optimization</h2>
-        <p className="text-purple-300">Find the optimal team to defeat the Digital Basilisk</p>
+        <h2 className="text-3xl font-bold text-white mb-2">
+          Combat Optimization
+        </h2>
+        <p className="text-purple-300">
+          Find the optimal team to defeat the Digital Basilisk
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -85,13 +105,13 @@ export function CombatView() {
             <h3 className="text-xl font-bold text-white mb-4">
               Select Fighters ({selectedFighters.length}/5)
             </h3>
-            
+
             {loadingFighters ? (
               <div className="flex justify-center py-12">
                 <LoadingSpinner size="lg" />
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto p-2">
                 {fighters.map((fighter) => (
                   <FighterCard
                     key={fighter.id}
@@ -108,13 +128,17 @@ export function CombatView() {
         {/* Battle Configuration */}
         <div className="space-y-4">
           <Card>
-            <h3 className="text-xl font-bold text-white mb-4">Battle Configuration</h3>
-            
+            <h3 className="text-xl font-bold text-white mb-4">
+              Battle Configuration
+            </h3>
+
             <div className="space-y-4">
               <Select
                 label="Terrain"
                 value={config.terrain}
-                onChange={(e) => setConfig({ ...config, terrain: e.target.value })}
+                onChange={(e) =>
+                  setConfig({ ...config, terrain: e.target.value })
+                }
               >
                 <option value="forest">CyberForest</option>
                 <option value="mountains">QuantumMountains</option>
@@ -127,16 +151,26 @@ export function CombatView() {
                 min={20}
                 max={50}
                 step={1}
-                onChange={(e) => setConfig({ ...config, basilisk_base_damage: parseInt(e.target.value) })}
+                onChange={(e) =>
+                  setConfig({
+                    ...config,
+                    basilisk_base_damage: parseInt(e.target.value),
+                  })
+                }
               />
 
               <RangeInput
                 label="Rage Multiplier"
                 value={config.rage_multiplier}
-                min={1.00}
-                max={1.20}
+                min={1.0}
+                max={1.2}
                 step={0.01}
-                onChange={(e) => setConfig({ ...config, rage_multiplier: parseFloat(e.target.value) })}
+                onChange={(e) =>
+                  setConfig({
+                    ...config,
+                    rage_multiplier: parseFloat(e.target.value),
+                  })
+                }
               />
 
               <RangeInput
@@ -145,7 +179,12 @@ export function CombatView() {
                 min={30}
                 max={100}
                 step={5}
-                onChange={(e) => setConfig({ ...config, battle_duration_limit: parseInt(e.target.value) })}
+                onChange={(e) =>
+                  setConfig({
+                    ...config,
+                    battle_duration_limit: parseInt(e.target.value),
+                  })
+                }
               />
 
               <Button
@@ -164,27 +203,33 @@ export function CombatView() {
 
       {/* Optimization Results */}
       {optimization && (
-        <Card>
-          <h3 className="text-2xl font-bold text-white mb-6">Optimization Results</h3>
-          
+        <Card ref={optimizationRef}>
+          <h3 className="text-2xl font-bold text-white mb-6">
+            Optimization Results
+          </h3>
+
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <MetricCard
               label="Victory Probability"
-              value={`${((optimization.ml_predictions?.victory_probability || 0) * 100).toFixed(1)}%`}
+              value={`${(
+                (optimization.ml_predictions?.victory_probability || 0) * 100
+              ).toFixed(1)}%`}
               gradient="from-green-500/20 to-emerald-500/20"
               borderColor="border-green-500/30"
               textColor="text-green-300"
             />
-            
+
             <MetricCard
               label="Expected Damage"
-              value={(optimization.algorithm_result?.total_damage || 0).toFixed(0)}
+              value={(optimization.algorithm_result?.total_damage || 0).toFixed(
+                0
+              )}
               gradient="from-orange-500/20 to-red-500/20"
               borderColor="border-orange-500/30"
               textColor="text-orange-300"
             />
-            
+
             <MetricCard
               label="Battle Duration"
               value={`${optimization.battle_simulation?.duration || 0} turns`}
@@ -209,14 +254,23 @@ export function CombatView() {
           {optimization.battle_simulation?.synergy_bonuses && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-4 bg-slate-900/50 border border-purple-500/30 rounded-lg">
-                <h4 className="text-purple-300 font-semibold mb-3">Synergy Bonuses</h4>
+                <h4 className="text-purple-300 font-semibold mb-3">
+                  Synergy Bonuses
+                </h4>
                 <div className="space-y-2">
-                  {Object.entries(optimization.battle_simulation.synergy_bonuses).map(([key, value]) => (
-                    <div key={key} className="flex justify-between items-center">
+                  {Object.entries(
+                    optimization.battle_simulation.synergy_bonuses
+                  ).map(([key, value]) => (
+                    <div
+                      key={key}
+                      className="flex justify-between items-center"
+                    >
                       <span className="text-slate-300 capitalize text-sm">
-                        {key.replace(/_/g, ' ')}
+                        {key.replace(/_/g, " ")}
                       </span>
-                      <span className="text-green-400 font-semibold">+{value}</span>
+                      <span className="text-green-400 font-semibold">
+                        +{value}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -224,14 +278,23 @@ export function CombatView() {
 
               {optimization.battle_simulation?.damage_breakdown && (
                 <div className="p-4 bg-slate-900/50 border border-purple-500/30 rounded-lg">
-                  <h4 className="text-purple-300 font-semibold mb-3">Damage Breakdown</h4>
+                  <h4 className="text-purple-300 font-semibold mb-3">
+                    Damage Breakdown
+                  </h4>
                   <div className="space-y-2">
-                    {Object.entries(optimization.battle_simulation.damage_breakdown).map(([key, value]) => (
-                      <div key={key} className="flex justify-between items-center">
+                    {Object.entries(
+                      optimization.battle_simulation.damage_breakdown
+                    ).map(([key, value]) => (
+                      <div
+                        key={key}
+                        className="flex justify-between items-center"
+                      >
                         <span className="text-slate-300 capitalize text-sm">
-                          {key.replace(/_/g, ' ')}
+                          {key.replace(/_/g, " ")}
                         </span>
-                        <span className="text-red-400 font-semibold">{value?.toFixed(1) || 0}</span>
+                        <span className="text-red-400 font-semibold">
+                          {value?.toFixed(1) || 0}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -247,7 +310,9 @@ export function CombatView() {
 
 function MetricCard({ label, value, gradient, borderColor, textColor }) {
   return (
-    <div className={`bg-gradient-to-br ${gradient} border ${borderColor} rounded-lg p-4`}>
+    <div
+      className={`bg-gradient-to-br ${gradient} border ${borderColor} rounded-lg p-4`}
+    >
       <div className={`${textColor} text-sm mb-1`}>{label}</div>
       <div className="text-3xl font-bold text-white">{value}</div>
     </div>
