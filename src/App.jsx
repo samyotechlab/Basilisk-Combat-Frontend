@@ -5,7 +5,7 @@ import { Dashboard } from './components/dashboard/Dashboard';
 import { Loading } from './components/common/Loading';
 function AppContent() {
   const { user, loading } = useAuth();
-
+   console.log("test")
   if (loading) {
     return <Loading message="Loading Basilisk Combat Intelligence..." />;
   }
