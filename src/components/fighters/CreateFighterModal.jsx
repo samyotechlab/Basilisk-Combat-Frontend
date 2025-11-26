@@ -1,36 +1,38 @@
-import React, { useState } from 'react';
-import { Modal } from '../common/Modal';
-import { Input, Select } from '../common/Input';
-import { Button } from '../common/Button';
-import { api } from '../../services/api';
-import { useAuth } from '../../context/AuthContext';
+import React, { useState } from "react";
+import { Modal } from "../common/Modal";
+import { Input, Select } from "../common/Input";
+import { Button } from "../common/Button";
+import { api } from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 
 export function CreateFighterModal({ isOpen, onClose, onSuccess }) {
   const { token } = useAuth();
   const [formData, setFormData] = useState({
-    name: '',
+    name: "",
     health: 100,
     damage: 25,
-    fighter_class: 'warrior',
+    fighter_class: "warrior",
     special_ability: {
-      name: '',
+      name: "",
       bonus_damage: 0,
-      cooldown: 3
+      cooldown: 3,
+      damage: 25,
+      damage_reduction: 0,
     },
     terrain_affinity: {
       forest: 1.0,
       mountains: 1.0,
-      swamp: 1.0
-    }
+      swamp: 1.0,
+    },
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
   };
 
@@ -38,7 +40,13 @@ export function CreateFighterModal({ isOpen, onClose, onSuccess }) {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: parseInt(value) || 0
+      [name]: parseInt(value) || 0,
+      ...(name === "damage" && {
+        special_ability: {
+          ...formData.special_ability,
+          damage: value,
+        },
+      }),
     });
   };
 
@@ -48,8 +56,8 @@ export function CreateFighterModal({ isOpen, onClose, onSuccess }) {
       ...formData,
       special_ability: {
         ...formData.special_ability,
-        [name]: name === 'name' ? value : (parseInt(value) || 0)
-      }
+        [name]: name === "name" ? value : parseInt(value) || 0,
+      },
     });
   };
 
@@ -58,15 +66,15 @@ export function CreateFighterModal({ isOpen, onClose, onSuccess }) {
       ...formData,
       terrain_affinity: {
         ...formData.terrain_affinity,
-        [terrain]: parseFloat(value)
-      }
+        [terrain]: parseFloat(value),
+      },
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       await api.createFighter(token, formData);
@@ -74,20 +82,20 @@ export function CreateFighterModal({ isOpen, onClose, onSuccess }) {
       onClose();
       // Reset form
       setFormData({
-        name: '',
+        name: "",
         health: 100,
         damage: 25,
-        fighter_class: 'warrior',
+        fighter_class: "warrior",
         special_ability: {
-          name: '',
+          name: "",
           bonus_damage: 0,
-          cooldown: 3
+          cooldown: 3,
         },
         terrain_affinity: {
           forest: 1.0,
           mountains: 1.0,
-          swamp: 1.0
-        }
+          swamp: 1.0,
+        },
       });
     } catch (err) {
       setError(err.message);
@@ -97,7 +105,12 @@ export function CreateFighterModal({ isOpen, onClose, onSuccess }) {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Create New Fighter" maxWidth="max-w-2xl">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Create New Fighter"
+      maxWidth="max-w-2xl"
+    >
       {error && (
         <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300 text-sm">
           {error}
@@ -156,7 +169,7 @@ export function CreateFighterModal({ isOpen, onClose, onSuccess }) {
         {/* Special Ability */}
         <div className="border border-purple-500/30 rounded-lg p-4 space-y-3">
           <h4 className="text-white font-semibold">Special Ability</h4>
-          
+
           <Input
             label="Ability Name"
             name="name"
@@ -176,7 +189,15 @@ export function CreateFighterModal({ isOpen, onClose, onSuccess }) {
               value={formData.special_ability.bonus_damage}
               onChange={handleSpecialAbilityChange}
             />
-
+            <Input
+              label="Damage Reduction"
+              name="damage_reduction"
+              type="number"
+              min="0"
+              max="50"
+              value={formData.special_ability.damage_reduction}
+              onChange={handleSpecialAbilityChange}
+            />
             <Input
               label="Cooldown (turns)"
               name="cooldown"
@@ -191,8 +212,10 @@ export function CreateFighterModal({ isOpen, onClose, onSuccess }) {
 
         {/* Terrain Affinity */}
         <div className="border border-purple-500/30 rounded-lg p-4 space-y-3">
-          <h4 className="text-white font-semibold">Terrain Affinity (Multipliers)</h4>
-          
+          <h4 className="text-white font-semibold">
+            Terrain Affinity (Multipliers)
+          </h4>
+
           <div className="space-y-3">
             <div>
               <label className="block text-sm text-purple-300 mb-2">
@@ -204,7 +227,7 @@ export function CreateFighterModal({ isOpen, onClose, onSuccess }) {
                 max="1.5"
                 step="0.1"
                 value={formData.terrain_affinity.forest}
-                onChange={(e) => handleTerrainChange('forest', e.target.value)}
+                onChange={(e) => handleTerrainChange("forest", e.target.value)}
                 className="w-full"
               />
             </div>
@@ -219,7 +242,9 @@ export function CreateFighterModal({ isOpen, onClose, onSuccess }) {
                 max="1.5"
                 step="0.1"
                 value={formData.terrain_affinity.mountains}
-                onChange={(e) => handleTerrainChange('mountains', e.target.value)}
+                onChange={(e) =>
+                  handleTerrainChange("mountains", e.target.value)
+                }
                 className="w-full"
               />
             </div>
@@ -234,7 +259,7 @@ export function CreateFighterModal({ isOpen, onClose, onSuccess }) {
                 max="1.5"
                 step="0.1"
                 value={formData.terrain_affinity.swamp}
-                onChange={(e) => handleTerrainChange('swamp', e.target.value)}
+                onChange={(e) => handleTerrainChange("swamp", e.target.value)}
                 className="w-full"
               />
             </div>

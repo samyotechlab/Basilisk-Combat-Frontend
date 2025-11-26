@@ -112,7 +112,7 @@ export function LoginPage() {
               required
             />
 
-            {!isLogin && (
+            {/* {!isLogin && (
               <Select
                 label="Role"
                 name="role"
@@ -122,7 +122,7 @@ export function LoginPage() {
                 <option value="commander">Commander</option>
                 <option value="admin">Admin</option>
               </Select>
-            )}
+            )} */}
 
             <Button
               type="submit"

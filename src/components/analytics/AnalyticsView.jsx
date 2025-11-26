@@ -23,7 +23,7 @@ export function AnalyticsView() {
       // Set mock data for demonstration
       setAnalytics({
         total_battles: 234,
-        win_rate: 78.5,
+        victory_rate: 78.5,
         avg_damage: 1847,
         most_used_class: 'warrior',
         best_terrain: 'mountains',
@@ -74,7 +74,7 @@ export function AnalyticsView() {
 
         <Card className="bg-gradient-to-br from-green-500/20 to-emerald-500/20">
           <h3 className="text-green-300 text-sm font-medium mb-2">Win Rate</h3>
-          <div className="text-4xl font-bold text-white mb-2">{analytics?.win_rate || 0}%</div>
+          <div className="text-4xl font-bold text-white mb-2">{analytics?.victory_rate*100 || 0}%</div>
           <div className="text-green-300 text-sm">Overall success rate</div>
         </Card>
 

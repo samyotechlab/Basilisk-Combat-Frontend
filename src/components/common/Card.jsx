@@ -1,9 +1,14 @@
 /* eslint-disable no-unused-vars */
-import React from 'react';
+import React from "react";
 
-export function Card({ children, className = '', hover = false }) {
+export function Card({ children, className = "", hover = false, ...props }) {
   return (
-    <div className={`bg-slate-800/50 backdrop-blur-xl border border-purple-500/30 rounded-xl p-6 ${hover ? 'hover:border-purple-500/50 transition-all' : ''} ${className}`}>
+    <div
+      {...props}
+      className={`bg-slate-800/50 backdrop-blur-xl border border-purple-500/30 rounded-xl p-6 ${
+        hover ? "hover:border-purple-500/50 transition-all" : ""
+      } ${className}`}
+    >
       {children}
     </div>
   );

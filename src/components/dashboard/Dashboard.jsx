@@ -14,7 +14,7 @@ export function Dashboard() {
   const renderView = () => {
     switch (currentView) {
       case 'overview':
-        return <OverviewView />;
+        return <OverviewView setCurrentView={setCurrentView}/>;
       case 'fighters':
         return <FightersView />;
       case 'combat':
