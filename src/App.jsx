@@ -1,15 +1,8 @@
 /* eslint-disable no-unused-vars */
-import React from 'react';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import {  useAuth } from './context/AuthContext';
 import { LoginPage } from './components/auth/LoginPage';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { Loading } from './components/common/Loading';
-import VirtualRingTryOn from './VirtualRingTryOn';
-import TangibleeWidget from './TangibleeWidget';
-import RingConfigurator from './RingConfigurator';
-import  sword from './assets/sword.glb'
-import Model360Viewer from './Model360Viewer';
-import RingTryOn from './RingTryOn';
 import VoyagerForecastApp from './VoyagerForecastApp';
 function AppContent() {
   const { user, loading } = useAuth();
